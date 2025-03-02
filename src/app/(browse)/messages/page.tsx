@@ -24,7 +24,7 @@ interface Message {
   conversation?: string;
   webhookEvent?: string;
   rawData?: any;
-  [key: string]: any; // Permitir qualquer outra propriedade
+  [key: string]: any;
 }
 
 export default function MessagesPage() {
@@ -63,6 +63,8 @@ export default function MessagesPage() {
       console.log("Webhook configurado:", data);
       
       setWebhookConfigured(true);
+      setWebhookToken(data.webhookToken);
+      
       toast({
         title: "Webhook configurado",
         description: "Seu webhook foi configurado com sucesso",
@@ -87,7 +89,6 @@ export default function MessagesPage() {
     try {
       setIsRefreshing(true);
       
-      // Usar encodeURIComponent para garantir que o email seja codificado corretamente
       const encodedInstanceName = encodeURIComponent(instanceName.trim());
       const response = await fetch(`/api/whatsapp/webhook/receiver/${encodedInstanceName}?token=${webhookToken}`);
       
@@ -97,7 +98,6 @@ export default function MessagesPage() {
       }
       
       const data = await response.json();
-      console.log("Mensagens recebidas:", data);
       
       if (data.messages && Array.isArray(data.messages)) {
         setMessages(data.messages);
@@ -146,17 +146,14 @@ export default function MessagesPage() {
       }
       
       const data = await response.json();
-      console.log("Mensagem enviada:", data);
       
       toast({
         title: "Mensagem enviada",
         description: "Sua mensagem foi enviada com sucesso",
       });
       
-      // Limpar campo de mensagem
       setMessageText("");
       
-      // Atualizar lista de mensagens após um breve delay
       setTimeout(fetchMessages, 1000);
     } catch (error) {
       console.error("Erro ao enviar mensagem:", error);
@@ -190,7 +187,6 @@ export default function MessagesPage() {
     
     const fetchMessages = async () => {
       try {
-        // Usar encodeURIComponent para garantir que o email seja codificado corretamente
         const encodedInstanceName = encodeURIComponent(instanceName.trim());
         const response = await fetch(`/api/whatsapp/webhook/receiver/${encodedInstanceName}?token=${webhookToken}`);
         
@@ -200,7 +196,6 @@ export default function MessagesPage() {
         }
         
         const data = await response.json();
-        console.log("Mensagens recebidas:", data);
         
         if (data.messages && Array.isArray(data.messages)) {
           setMessages(data.messages);
@@ -210,33 +205,33 @@ export default function MessagesPage() {
       }
     };
     
-    // Buscar mensagens imediatamente
     fetchMessages();
     
-    // Configurar polling a cada 5 segundos
     const interval = setInterval(fetchMessages, 5000);
     
-    // Limpar intervalo quando o componente for desmontado
     return () => clearInterval(interval);
   }, [webhookConfigured, instanceName, webhookToken]);
 
   // Renderizar mensagem
   const renderMessage = (message: Message) => {
-    console.log('Dados completos da mensagem:', message); // Debug
-
     const isReceived = message.type === "received";
     
-    // Tentar extrair o conteúdo da mensagem de várias formas possíveis
-    const textContent = 
-      message.conversation ||
-      message.message?.conversation ||
-      message.message?.extendedTextMessage?.text ||
-      message.text ||
-      message.body ||
-      (typeof message.message === 'string' ? message.message : null) ||
-      JSON.stringify(message.message || message);
+    // Extrair o conteúdo da mensagem
+    let textContent = "";
     
-    // Tentar extrair o timestamp de várias formas possíveis
+    if (message.webhookEvent === "send.message" && message.rawData?.data?.message?.conversation) {
+      textContent = message.rawData.data.message.conversation;
+    } else {
+      textContent = message.conversation || 
+                   message.message?.conversation ||
+                   message.message?.extendedTextMessage?.text ||
+                   message.text ||
+                   message.body ||
+                   (typeof message.message === 'string' ? message.message : null) ||
+                   JSON.stringify(message.message || message);
+    }
+    
+    // Extrair o timestamp
     const timestamp = message.timestamp || 
       (message.messageTimestamp ? new Date(message.messageTimestamp * 1000).toISOString() : null) ||
       new Date().toISOString();
@@ -244,22 +239,13 @@ export default function MessagesPage() {
     const formattedTime = new Date(timestamp).toLocaleTimeString();
     const formattedDate = new Date(timestamp).toLocaleDateString();
     
-    // Tentar extrair o remetente de várias formas possíveis
+    // Extrair o remetente
     const sender = isReceived 
       ? (message.pushName || 
          message.key?.remoteJid?.split('@')[0] || 
          message.from?.split('@')[0] ||
          "Desconhecido")
       : "Você";
-    
-    // Log para debug
-    console.log('Mensagem processada:', {
-      id: message.key?.id || 'no-id',
-      type: message.type,
-      content: textContent,
-      sender,
-      timestamp
-    });
     
     return (
       <div 

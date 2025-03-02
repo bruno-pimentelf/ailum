@@ -207,13 +207,16 @@ interface ChatDialogProps {
   contact: Contact
   open: boolean
   onOpenChange: (open: boolean) => void
+  onSendMessage?: (message: string) => Promise<boolean>
+  onUpdateStage?: (stageId: string) => void
 }
 
-export function ChatDialog({ contact, open, onOpenChange }: ChatDialogProps) {
+export function ChatDialog({ contact, open, onOpenChange, onSendMessage, onUpdateStage }: ChatDialogProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [editedContact, setEditedContact] = useState<Contact>({ ...contact })
   const [isEditing, setIsEditing] = useState(false)
+  const [isSending, setIsSending] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Efeito para carregar mensagens do contato
@@ -292,28 +295,60 @@ export function ChatDialog({ contact, open, onOpenChange }: ChatDialogProps) {
   }, [contact])
 
   // Função para enviar mensagem
-  const handleSendMessage = () => {
-    if (newMessage.trim() === "") return
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return;
     
+    setIsSending(true);
+    
+    // Adicionar mensagem localmente
     const newMsg: Message = {
-      id: `msg${Date.now()}`,
+      id: `msg-${Date.now()}`,
       contactId: contact.id,
       content: newMessage,
       timestamp: "Agora",
       isFromContact: false,
       isRead: true
+    };
+    
+    setMessages([...messages, newMsg]);
+    setNewMessage("");
+    
+    // Scroll para o final
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100);
+    
+    // Enviar mensagem via API
+    if (onSendMessage) {
+      const success = await onSendMessage(newMessage);
+      
+      if (!success) {
+        // Adicionar indicador de erro à mensagem
+        setMessages(prev => 
+          prev.map(m => 
+            m.id === newMsg.id 
+              ? { ...m, error: true } 
+              : m
+          )
+        );
+      }
     }
     
-    setMessages([...messages, newMsg])
-    setNewMessage("")
-  }
+    setIsSending(false);
+  };
 
   // Função para salvar alterações do contato
   const handleSaveContact = () => {
-    // Aqui seria uma chamada API para salvar as alterações
-    setIsEditing(false)
-    // Atualizar o contato no estado global (não implementado neste exemplo)
-  }
+    // Atualizar contato
+    setIsEditing(false);
+    
+    // Atualizar estágio se mudou
+    if (onUpdateStage && editedContact.stageId !== contact.stageId) {
+      onUpdateStage(editedContact.stageId);
+    }
+  };
 
   // Função para obter o funil pelo ID
   const getFunnelById = (id: string) => {
@@ -433,31 +468,37 @@ export function ChatDialog({ contact, open, onOpenChange }: ChatDialogProps) {
                       </div>
                     </div>
                     
-                    {/* Status (Coluna) */}
-                    <div className="flex items-start gap-2">
-                      <div className="h-4 w-4 rounded-full bg-blue-500 mt-0.5" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Status</p>
-                        {isEditing ? (
-                          <Select 
-                            value={editedContact.stageId}
-                            onValueChange={(value) => setEditedContact({...editedContact, stageId: value})}
-                          >
-                            <SelectTrigger className="h-7 mt-1">
-                              <SelectValue placeholder="Selecione um status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {getCurrentFunnelStages().map((stage) => (
-                                <SelectItem key={stage.id} value={stage.id}>
-                                  {stage.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <p className="text-sm">{getStageName(editedContact.stageId)}</p>
-                        )}
-                      </div>
+                    {/* Seletor de estágio */}
+                    <div className="grid gap-2">
+                      <Label htmlFor="stage">Estágio</Label>
+                      <Select
+                        value={editedContact.stageId}
+                        onValueChange={(value) => {
+                          setEditedContact({
+                            ...editedContact,
+                            stageId: value
+                          })
+                          
+                          // Atualizar estágio imediatamente se não estiver editando
+                          if (!isEditing && onUpdateStage) {
+                            onUpdateStage(value);
+                          }
+                        }}
+                      >
+                        <SelectTrigger id="stage">
+                          <SelectValue placeholder="Selecione o estágio" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getCurrentFunnelStages().map((stage) => (
+                            <SelectItem key={stage.id} value={stage.id}>
+                              <div className="flex items-center gap-2">
+                                <div className={`h-2 w-2 rounded-full ${stage.color}`} />
+                                <span>{stage.name}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     
                     {/* Funil */}
@@ -644,38 +685,31 @@ export function ChatDialog({ contact, open, onOpenChange }: ChatDialogProps) {
                 </div>
               </div>
               
-              {/* Área de digitação */}
-              <div className="p-4 border-t">
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Digite sua mensagem..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault()
-                        handleSendMessage()
-                      }
-                    }}
-                    className="flex-1"
-                  />
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button 
-                          size="icon" 
-                          onClick={handleSendMessage}
-                          disabled={newMessage.trim() === ""}
-                        >
-                          <Send className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Enviar mensagem</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
+              {/* Área de entrada de mensagem */}
+              <div className="flex items-center gap-2 p-2 border-t">
+                <Input
+                  placeholder="Digite sua mensagem..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  className="flex-1"
+                />
+                <Button 
+                  size="icon" 
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim() || isSending}
+                >
+                  {isSending ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
             </div>
           </div>

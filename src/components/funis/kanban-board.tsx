@@ -8,12 +8,38 @@ interface KanbanBoardProps {
   viewMode: 'scroll' | 'grid'
   onChatOpen: (contact: Contact) => void
   kanbanRef: React.RefObject<HTMLDivElement>
+  onContactMove?: (contactId: string, newStageId: string) => void
 }
 
-export function KanbanBoard({ funnel, contacts, viewMode, onChatOpen, kanbanRef }: KanbanBoardProps) {
+export function KanbanBoard({ 
+  funnel, 
+  contacts, 
+  viewMode, 
+  onChatOpen, 
+  kanbanRef,
+  onContactMove 
+}: KanbanBoardProps) {
   // Filtra contatos pelo funil selecionado
   const getContactsForStage = (stageId: string) => {
     return contacts.filter(contact => contact.stageId === stageId)
+  }
+
+  // Função para lidar com o início do arrasto
+  const handleDragStart = (e: React.DragEvent, contactId: string) => {
+    e.dataTransfer.setData("contactId", contactId)
+  }
+
+  // Função para lidar com o drop
+  const handleDrop = (e: React.DragEvent, stageId: string) => {
+    const contactId = e.dataTransfer.getData("contactId")
+    if (contactId && onContactMove) {
+      onContactMove(contactId, stageId)
+    }
+  }
+
+  // Permitir drop
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
   }
 
   return (
@@ -40,11 +66,14 @@ export function KanbanBoard({ funnel, contacts, viewMode, onChatOpen, kanbanRef 
               : 'w-full h-full'
             }
           `}
+          onDrop={(e) => handleDrop(e, stage.id)}
+          onDragOver={handleDragOver}
         >
           <StageColumn
             stage={stage}
             contacts={getContactsForStage(stage.id)}
             onChatOpen={onChatOpen}
+            onDragStart={handleDragStart}
           />
         </div>
       ))}

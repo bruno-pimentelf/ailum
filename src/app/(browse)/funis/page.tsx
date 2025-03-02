@@ -1,12 +1,17 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { ChatDialog } from "@/components/funis/chat-dialog"
 import { FunnelHeader } from "@/components/funis/funnel-header"
 import { KanbanControls } from "@/components/funis/kanban-controls"
 import { KanbanBoard } from "@/components/funis/kanban-board"
 import { InfoMessage } from "@/components/funis/info-message"
 import { Contact, Funnel } from "@/types/funis"
+import { toast } from "@/components/ui/use-toast"
+import { Button } from "@/components/ui/button"
+import { AlertCircle } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 // Dados de exemplo
 const funnels: Funnel[] = [
@@ -48,84 +53,37 @@ const funnels: Funnel[] = [
   },
 ]
 
-// Contatos de exemplo
-const contacts: Contact[] = [
-  {
-    id: "contact1",
-    name: "Maria Silva",
-    phone: "+5511987654321",
-    avatar: "/avatars/maria.jpg",
-    stageId: "novo-contato",
-    status: "needs_response",
-    lastActivity: "Hoje, 10:30",
-    unreadCount: 2
-  },
-  {
-    id: "contact2",
-    name: "João Pereira",
-    phone: "+5511912345678",
-    stageId: "interesse",
-    status: "in_conversation",
-    lastActivity: "Hoje, 09:15"
-  },
-  {
-    id: "contact3",
-    name: "Ana Oliveira",
-    phone: "+5511998765432",
-    stageId: "agendamento",
-    status: "waiting_client",
-    lastActivity: "Ontem, 18:45"
-  },
-  {
-    id: "contact4",
-    name: "Carlos Santos",
-    phone: "+5511987651234",
-    stageId: "novo-contato",
-    status: "needs_response",
-    lastActivity: "Ontem, 15:20",
-    unreadCount: 1
-  },
-  {
-    id: "contact5",
-    name: "Fernanda Lima",
-    phone: "+5511976543210",
-    stageId: "agendamento",
-    status: "in_conversation",
-    lastActivity: "Ontem, 14:05"
-  },
-  {
-    id: "contact6",
-    name: "Roberto Alves",
-    phone: "+5511965432109",
-    stageId: "interesse",
-    status: "needs_response",
-    lastActivity: "Segunda, 16:30",
-    unreadCount: 3
-  },
-  {
-    id: "contact7",
-    name: "Luciana Costa",
-    phone: "+5511954321098",
-    stageId: "confirmacao",
-    status: "resolved",
-    lastActivity: "Segunda, 09:10"
-  },
-  {
-    id: "contact8",
-    name: "Marcelo Souza",
-    phone: "+5511943210987",
-    stageId: "concluido",
-    status: "resolved",
-    lastActivity: "Domingo, 18:20"
-  },
-]
+// Interface para mensagens
+interface Message {
+  key?: {
+    id: string;
+    remoteJid?: string;
+  };
+  message?: any;
+  timestamp?: string;
+  type?: "sent" | "received";
+  pushName?: string;
+  messageTimestamp?: number;
+  conversation?: string;
+  webhookEvent?: string;
+  rawData?: any;
+  [key: string]: any;
+}
 
 export default function FunnelsPage() {
+  const { data: session } = useSession()
   const [selectedFunnel, setSelectedFunnel] = useState<Funnel>(funnels[0])
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [viewMode, setViewMode] = useState<'scroll' | 'grid'>('grid')
   const kanbanRef = useRef<HTMLDivElement>(null)
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [webhookConfigured, setWebhookConfigured] = useState(false)
+  const [webhookToken, setWebhookToken] = useState("")
+  const [instanceName, setInstanceName] = useState(session?.user?.email || "")
+  const [messages, setMessages] = useState<Message[]>([])
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null)
   
   // Funções para navegação horizontal do Kanban
   const scrollLeft = () => {
@@ -144,7 +102,320 @@ export default function FunnelsPage() {
   const handleOpenChat = (contact: Contact) => {
     setSelectedContact(contact)
     setIsChatOpen(true)
+    
+    // Marcar mensagens como lidas
+    if (contact.unreadCount) {
+      const updatedContacts = contacts.map(c => {
+        if (c.id === contact.id) {
+          return { ...c, unreadCount: 0, status: "in_conversation" as const }
+        }
+        return c
+      })
+      setContacts(updatedContacts)
+    }
   }
+
+  // Configurar webhook
+  const configureWebhook = async () => {
+    if (!instanceName) return;
+    
+    try {
+      const response = await fetch("/api/whatsapp/webhook/set", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ instanceName }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setWebhookConfigured(true);
+        setWebhookToken(data.token || "");
+        toast({
+          title: "Webhook configurado com sucesso",
+          description: "Agora você receberá mensagens em tempo real.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro ao configurar webhook",
+          description: data.error || "Ocorreu um erro ao configurar o webhook.",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao configurar webhook:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao configurar webhook",
+        description: "Ocorreu um erro ao configurar o webhook.",
+      });
+    }
+  };
+
+  // Buscar mensagens
+  const fetchMessages = async () => {
+    if (!instanceName) return;
+    
+    try {
+      const response = await fetch(`/api/whatsapp/webhook?instance=${instanceName}`);
+      
+      if (!response.ok) {
+        throw new Error("Erro ao buscar mensagens");
+      }
+      
+      const data = await response.json();
+      
+      if (data && Array.isArray(data.messages)) {
+        setMessages(data.messages);
+        processNewMessages(data.messages);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar mensagens:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Processar novas mensagens e atualizar contatos
+  const processNewMessages = (newMessages: Message[]) => {
+    const receivedMessages = newMessages.filter(msg => 
+      msg.type === "received" && 
+      (msg.conversation || (msg.message?.conversation) || 
+       (msg.message?.extendedTextMessage?.text))
+    );
+    
+    if (receivedMessages.length === 0) return;
+    
+    // Atualizar contatos existentes ou adicionar novos
+    const updatedContacts = [...contacts];
+    
+    receivedMessages.forEach(msg => {
+      const phoneNumber = msg.key?.remoteJid?.split('@')[0] || "";
+      const contactName = msg.pushName || `Contato ${phoneNumber.slice(-4)}`;
+      const messageContent = msg.conversation || 
+                            msg.message?.conversation || 
+                            msg.message?.extendedTextMessage?.text || "";
+      const timestamp = new Date(msg.messageTimestamp ? msg.messageTimestamp * 1000 : Date.now());
+      
+      // Verificar se o contato já existe
+      const existingContactIndex = updatedContacts.findIndex(
+        c => c.phone === phoneNumber || c.phone === `+${phoneNumber}`
+      );
+      
+      if (existingContactIndex >= 0) {
+        // Atualizar contato existente
+        updatedContacts[existingContactIndex] = {
+          ...updatedContacts[existingContactIndex],
+          lastActivity: formatTimestamp(timestamp),
+          status: "needs_response",
+          unreadCount: (updatedContacts[existingContactIndex].unreadCount || 0) + 1
+        };
+      } else {
+        // Adicionar novo contato
+        const newContact: Contact = {
+          id: `contact-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: contactName,
+          phone: phoneNumber,
+          stageId: "novo-contato", // Estágio inicial
+          status: "needs_response",
+          lastActivity: formatTimestamp(timestamp),
+          unreadCount: 1
+        };
+        
+        updatedContacts.push(newContact);
+        
+        // Notificar sobre novo contato
+        toast({
+          title: "Novo contato recebido",
+          description: `${contactName} enviou uma mensagem: "${messageContent.substring(0, 50)}${messageContent.length > 50 ? '...' : ''}"`,
+        });
+      }
+    });
+    
+    setContacts(updatedContacts);
+  };
+
+  // Formatar timestamp
+  const formatTimestamp = (date: Date) => {
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === now.toDateString()) {
+      return `Hoje, ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return `Ontem, ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    } else {
+      return `${date.getDate()}/${date.getMonth() + 1}, ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    }
+  };
+
+  // Enviar mensagem
+  const sendMessage = async (phoneNumber: string, message: string): Promise<boolean> => {
+    if (!instanceName || !phoneNumber || !message) return false;
+    
+    try {
+      const response = await fetch("/api/whatsapp/messages/send-text", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          instanceName,
+          phoneNumber,
+          message,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Erro ao enviar mensagem");
+      }
+      
+      // Atualizar status do contato
+      const updatedContacts = contacts.map(c => {
+        if (c.phone === phoneNumber || c.phone === `+${phoneNumber}`) {
+          return { 
+            ...c, 
+            status: "waiting_client" as const,
+            lastActivity: formatTimestamp(new Date())
+          };
+        }
+        return c;
+      });
+      
+      setContacts(updatedContacts as Contact[]);
+      
+      // Buscar mensagens atualizadas
+      fetchMessages();
+      
+      return true;
+    } catch (error) {
+      console.error("Erro ao enviar mensagem:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao enviar mensagem",
+        description: "Ocorreu um erro ao enviar a mensagem.",
+      });
+      return false;
+    }
+  };
+
+  // Atualizar estágio do contato
+  const updateContactStage = (contactId: string, newStageId: string) => {
+    const updatedContacts = contacts.map(c => {
+      if (c.id === contactId) {
+        return { ...c, stageId: newStageId };
+      }
+      return c;
+    });
+    
+    setContacts(updatedContacts as Contact[]);
+    
+    // Notificar sobre a mudança de estágio
+    const contact = contacts.find(c => c.id === contactId);
+    const stage = selectedFunnel.stages.find(s => s.id === newStageId);
+    
+    if (contact && stage) {
+      toast({
+        title: "Contato movido",
+        description: `${contact.name} foi movido para ${stage.name}`,
+      });
+    }
+  };
+
+  // Efeito para inicializar dados
+  useEffect(() => {
+    // Carregar contatos de exemplo inicialmente
+    setContacts([
+      {
+        id: "contact1",
+        name: "Maria Silva",
+        phone: "+5527995072522",
+        avatar: "/avatars/maria.jpg",
+        stageId: "novo-contato",
+        status: "needs_response" as const,
+        lastActivity: "Hoje, 10:30",
+        unreadCount: 2
+      },
+      {
+        id: "contact2",
+        name: "João Pereira",
+        phone: "+5511912345678",
+        stageId: "interesse",
+        status: "in_conversation" as const,
+        lastActivity: "Hoje, 09:15"
+      },
+      {
+        id: "contact3",
+        name: "Ana Oliveira",
+        phone: "+5511998765432",
+        stageId: "agendamento",
+        status: "waiting_client" as const,
+        lastActivity: "Ontem, 18:45"
+      },
+      {
+        id: "contact4",
+        name: "Carlos Santos",
+        phone: "+5511987651234",
+        stageId: "novo-contato",
+        status: "needs_response" as const,
+        lastActivity: "Ontem, 15:20",
+        unreadCount: 1
+      },
+      {
+        id: "contact5",
+        name: "Fernanda Lima",
+        phone: "+5511976543210",
+        stageId: "agendamento",
+        status: "in_conversation" as const,
+        lastActivity: "Ontem, 14:05"
+      },
+      {
+        id: "contact6",
+        name: "Roberto Alves",
+        phone: "+5511965432109",
+        stageId: "interesse",
+        status: "needs_response" as const,
+        lastActivity: "Segunda, 16:30",
+        unreadCount: 3
+      },
+      {
+        id: "contact7",
+        name: "Luciana Costa",
+        phone: "+5511954321098",
+        stageId: "confirmacao",
+        status: "resolved" as const,
+        lastActivity: "Segunda, 09:10"
+      },
+      {
+        id: "contact8",
+        name: "Marcelo Souza",
+        phone: "+5511943210987",
+        stageId: "concluido",
+        status: "resolved" as const,
+        lastActivity: "Domingo, 18:20"
+      }
+    ]);
+    
+    // Configurar webhook e buscar mensagens iniciais
+    if (instanceName) {
+      configureWebhook();
+      fetchMessages();
+      
+      // Configurar polling para buscar mensagens a cada 10 segundos
+      const interval = setInterval(fetchMessages, 10000);
+      setPollingInterval(interval);
+    }
+    
+    return () => {
+      // Limpar intervalo ao desmontar
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [instanceName]);
 
   // Efeito para ajustar o modo de visualização com base no tamanho da tela
   useEffect(() => {
@@ -170,6 +441,24 @@ export default function FunnelsPage() {
 
   return (
     <div className="flex flex-col h-full">
+      {!webhookConfigured && instanceName && (
+        <Alert className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Webhook não configurado</AlertTitle>
+          <AlertDescription className="flex items-center gap-2">
+            Configure o webhook para receber mensagens em tempo real.
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={configureWebhook}
+              disabled={!instanceName}
+            >
+              Configurar Webhook
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <FunnelHeader
         selectedFunnel={selectedFunnel}
         funnels={funnels}
@@ -189,6 +478,7 @@ export default function FunnelsPage() {
         viewMode={viewMode}
         onChatOpen={handleOpenChat}
         kanbanRef={kanbanRef}
+        onContactMove={updateContactStage}
       />
 
       <InfoMessage />
@@ -199,6 +489,8 @@ export default function FunnelsPage() {
           contact={selectedContact}
           open={isChatOpen}
           onOpenChange={setIsChatOpen}
+          onSendMessage={(message) => sendMessage(selectedContact.phone, message)}
+          onUpdateStage={(stageId) => updateContactStage(selectedContact.id, stageId)}
         />
       )}
     </div>

@@ -20,13 +20,18 @@ const getStatusInfo = (status: ContactStatus) => {
 interface ContactCardProps {
   contact: Contact
   onChatOpen: (contact: Contact) => void
+  onDragStart?: (e: React.DragEvent, contactId: string) => void
 }
 
-export function ContactCard({ contact, onChatOpen }: ContactCardProps) {
+export function ContactCard({ contact, onChatOpen, onDragStart }: ContactCardProps) {
   const statusInfo = getStatusInfo(contact.status)
 
   return (
-    <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+    <Card 
+      className="shadow-sm hover:shadow-md transition-shadow duration-200 cursor-grab active:cursor-grabbing"
+      draggable={!!onDragStart}
+      onDragStart={(e) => onDragStart && onDragStart(e, contact.id)}
+    >
       <CardHeader className="p-2 sm:p-3 pb-0 flex flex-row items-center gap-2">
         <div className="flex h-6 w-6 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
           {contact.avatar ? (

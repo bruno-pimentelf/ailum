@@ -5,9 +5,10 @@ interface StageColumnProps {
   stage: FunnelStage
   contacts: Contact[]
   onChatOpen: (contact: Contact) => void
+  onDragStart?: (e: React.DragEvent, contactId: string) => void
 }
 
-export function StageColumn({ stage, contacts, onChatOpen }: StageColumnProps) {
+export function StageColumn({ stage, contacts, onChatOpen, onDragStart }: StageColumnProps) {
   return (
     <div className="flex flex-col border border-muted rounded-lg overflow-hidden">
       <div className={`flex items-center gap-2 p-2 ${stage.color.replace('bg-', 'bg-opacity-10 bg-')} border-b-2 ${stage.color.replace('bg-', 'border-')}`}>
@@ -23,6 +24,7 @@ export function StageColumn({ stage, contacts, onChatOpen }: StageColumnProps) {
             key={contact.id}
             contact={contact}
             onChatOpen={onChatOpen}
+            onDragStart={onDragStart}
           />
         ))}
         {contacts.length === 0 && (
