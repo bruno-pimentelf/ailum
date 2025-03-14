@@ -22,6 +22,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
 
 // Dados de navegação principal
 const navMainItems = [
@@ -132,14 +133,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="flex items-center justify-center p-2">
+      <SidebarHeader className="flex  items-center">
         <Image
-          src="/assets/images/ailum-logos/5.png"
+          src="/assets/images/ailum-logos/logo-horizontal-dark.png"
           alt="Ailum"
-          width={200}
+          width={150}
           height={100}
         />
       </SidebarHeader>
+      <Separator className="my-2" />
       <SidebarContent>
         <NavMain items={navMainWithActive} />
         <NavProjects projects={projectsWithActive} />

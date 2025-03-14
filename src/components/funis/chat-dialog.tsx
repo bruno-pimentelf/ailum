@@ -16,16 +16,12 @@ import {
   User, 
   X 
 } from "lucide-react"
-import Image from "next/image"
 
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -40,12 +36,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 
 // Tipos para o funil e mensagens
 type FunnelStage = {

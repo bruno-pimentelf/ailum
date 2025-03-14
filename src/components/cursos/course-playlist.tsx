@@ -15,7 +15,7 @@ export const playlists = [
         title: "Introdução ao Marketing Médico", 
         duration: "12:45", 
         active: false,
-        videoId: "34f6437d-d166-44a0-893d-81a566443eda"
+        videoId: "seu-video-id-1"
       },
       { 
         id: "m2", 
