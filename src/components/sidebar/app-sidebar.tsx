@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation"
 import Image from "next/image"
 import {
   BookOpen,
-  Cog,
   FolderKanban,
   Home,
   MessageSquare,
@@ -24,8 +23,15 @@ import {
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 
+interface NavItem {
+  title: string
+  url: string
+  icon: React.ComponentType<{ className?: string }> | (() => JSX.Element)
+  items?: { title: string; url: string }[]
+}
+
 // Dados de navegação principal
-const navMainItems = [
+const navMainItems: NavItem[] = [
   {
     title: "Dashboard",
     url: "/",
@@ -58,29 +64,6 @@ const navMainItems = [
     title: "E-Learning",
     url: "/cursos",
     icon: BookOpen,
-  },
-  {
-    title: "Configurações",
-    url: "/configuracoes",
-    icon: Cog,
-    items: [
-      {
-        title: "Perfil",
-        url: "/configuracoes/perfil",
-      },
-      {
-        title: "Clínica",
-        url: "/configuracoes/clinica",
-      },
-      {
-        title: "Integrações",
-        url: "/configuracoes/integracoes",
-      },
-      {
-        title: "Assinatura",
-        url: "/configuracoes/assinatura",
-      },
-    ],
   },
 ];
 
@@ -144,7 +127,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <Separator className="my-2" />
       <SidebarContent>
         <NavMain items={navMainWithActive} />
-        <NavProjects projects={projectsWithActive} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />

@@ -93,14 +93,6 @@ export function NavUser({
                 <BadgeCheck className="mr-2 h-4 w-4" />
                 <span>Conta</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard className="mr-2 h-4 w-4" />
-                <span>Faturamento</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell className="mr-2 h-4 w-4" />
-                <span>Notificações</span>
-              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={user.handleLogout}>
