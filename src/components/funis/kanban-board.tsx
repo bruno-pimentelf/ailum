@@ -42,6 +42,13 @@ export function KanbanBoard({
     e.preventDefault()
   }
 
+  // Função para passar ao StageColumn que lida com o caso de onContactMove ser opcional
+  const handleContactMove = (contactId: string, newStageId: string) => {
+    if (onContactMove) {
+      onContactMove(contactId, newStageId);
+    }
+  };
+
   return (
     <div 
       ref={kanbanRef}
@@ -74,6 +81,7 @@ export function KanbanBoard({
             contacts={getContactsForStage(stage.id)}
             onChatOpen={onChatOpen}
             onDragStart={handleDragStart}
+            onContactMove={handleContactMove}
           />
         </div>
       ))}
