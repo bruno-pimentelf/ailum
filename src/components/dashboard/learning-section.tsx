@@ -56,7 +56,7 @@ export function LearningSection() {
       </CardContent>
       <CardFooter>
         <Link 
-          href="#" 
+          href="/cursos" 
           className="text-sm text-primary hover:underline"
         >
           Ver todos os cursos

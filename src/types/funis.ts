@@ -1,18 +1,14 @@
-export type FunnelStage = {
-  id: string
-  name: string
-  color: string
-}
+// Tipos para o sistema de funis
 
-export type Funnel = {
-  id: string
-  name: string
-  stages: FunnelStage[]
-}
+// Status possíveis para um contato
+export type ContactStatus = 
+  | "needs_response" // Precisa de resposta
+  | "in_conversation" // Em conversa
+  | "waiting_client" // Aguardando cliente
+  | "resolved" // Resolvido
 
-export type ContactStatus = "needs_response" | "in_conversation" | "waiting_client" | "resolved"
-
-export type Contact = {
+// Interface para um contato
+export interface Contact {
   id: string
   name: string
   phone: string
@@ -21,4 +17,27 @@ export type Contact = {
   status: ContactStatus
   lastActivity: string
   unreadCount?: number
+}
+
+// Interface para um estágio do funil
+export interface Stage {
+  id: string
+  name: string
+  color: string
+}
+
+// Interface para um funil
+export interface Funnel {
+  id: string
+  name: string
+  stages: Stage[]
+}
+
+// Interface para uma mensagem
+export interface ChatMessage {
+  id: string
+  content: string
+  sender: "user" | "contact"
+  timestamp: string
+  status?: "sent" | "delivered" | "read"
 } 

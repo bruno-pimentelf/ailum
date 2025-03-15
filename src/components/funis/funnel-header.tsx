@@ -1,61 +1,73 @@
-import { Check, ChevronDown, Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Separator } from "@/components/ui/separator"
+"use client"
+
+import { useState, useEffect } from "react"
 import { Funnel } from "@/types/funis"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { Settings, Plus } from "lucide-react"
+import Link from "next/link"
 
 interface FunnelHeaderProps {
-  selectedFunnel: Funnel
+  selectedFunnel: Funnel | null
   funnels: Funnel[]
   onFunnelChange: (funnel: Funnel) => void
 }
 
 export function FunnelHeader({ selectedFunnel, funnels, onFunnelChange }: FunnelHeaderProps) {
-  return (
-    <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-        <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Funis de Vendas</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
-            Gerencie seus funis de vendas e acompanhe o progresso dos contatos via WhatsApp
-          </p>
-        </div>
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <Button variant="outline" size="sm" className="whitespace-nowrap h-8 text-xs sm:text-sm">
-            <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">Novo Funil</span>
-            <span className="sm:hidden">Novo</span>
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="max-w-[120px] sm:max-w-[150px] md:max-w-none h-8 text-xs sm:text-sm">
-                <span className="truncate">{selectedFunnel.name}</span>
-                <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2 flex-shrink-0" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {funnels.map((funnel) => (
-                <DropdownMenuItem 
-                  key={funnel.id}
-                  onClick={() => onFunnelChange(funnel)}
-                  className="flex items-center gap-2 text-xs sm:text-sm"
-                >
-                  {funnel.name}
-                  {funnel.id === selectedFunnel.id && (
-                    <Check className="h-3 w-3 sm:h-4 sm:w-4 ml-auto" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+  const [mounted, setMounted] = useState(false)
+
+  // Evitar erro de hidratação
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted || !selectedFunnel) {
+    return (
+      <div className="flex items-center justify-between mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div className="h-10 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+        <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
       </div>
-      <Separator className="mb-4 sm:mb-6" />
-    </>
+    )
+  }
+
+  return (
+    <div className="flex items-center justify-between w-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div className="flex items-center gap-2">
+        <h1 className="text-xl font-bold mr-4">Funil:</h1>
+        <Select
+          value={selectedFunnel.id}
+          onValueChange={(value) => {
+            const funnel = funnels.find(f => f.id === value)
+            if (funnel) onFunnelChange(funnel)
+          }}
+        >
+          <SelectTrigger className="w-[240px]">
+            <SelectValue placeholder="Selecione um funil" />
+          </SelectTrigger>
+          <SelectContent>
+            {funnels.map((funnel) => (
+              <SelectItem key={funnel.id} value={funnel.id}>
+                {funnel.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Link href="/funis/gerenciar">
+          <Button variant="outline" size="sm">
+            <Settings className="h-4 w-4 mr-2" />
+            Gerenciar Funis
+          </Button>
+        </Link>
+        <Link href="/funis/gerenciar">
+          <Button size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Funil
+          </Button>
+        </Link>
+      </div>
+    </div>
   )
 } 

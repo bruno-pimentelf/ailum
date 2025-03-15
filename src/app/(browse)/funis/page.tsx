@@ -10,48 +10,9 @@ import { InfoMessage } from "@/components/funis/info-message"
 import { Contact, Funnel } from "@/types/funis"
 import { toast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, Settings } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-
-// Dados de exemplo
-const funnels: Funnel[] = [
-  {
-    id: "consulta-inicial",
-    name: "Consulta Inicial",
-    stages: [
-      { id: "novo-contato", name: "Novo Contato", color: "bg-blue-500" },
-      { id: "interesse", name: "Demonstrou Interesse", color: "bg-purple-500" },
-      { id: "agendamento", name: "Agendamento", color: "bg-yellow-500" },
-      { id: "confirmacao", name: "Confirmação", color: "bg-green-500" },
-      { id: "concluido", name: "Consulta Realizada", color: "bg-emerald-500" },
-    ],
-  },
-  {
-    id: "procedimento-estetico",
-    name: "Procedimento Estético",
-    stages: [
-      { id: "contato-inicial", name: "Contato Inicial", color: "bg-blue-500" },
-      { id: "avaliacao", name: "Avaliação", color: "bg-indigo-500" },
-      { id: "orcamento", name: "Orçamento", color: "bg-purple-500" },
-      { id: "agendamento", name: "Agendamento", color: "bg-yellow-500" },
-      { id: "realizado", name: "Procedimento Realizado", color: "bg-green-500" },
-    ],
-  },
-  {
-    id: "cirurgia",
-    name: "Cirurgia Plástica",
-    stages: [
-      { id: "contato-inicial", name: "Contato Inicial", color: "bg-blue-500" },
-      { id: "consulta", name: "Consulta", color: "bg-indigo-500" },
-      { id: "exames", name: "Exames", color: "bg-violet-500" },
-      { id: "orcamento", name: "Orçamento", color: "bg-purple-500" },
-      { id: "agendamento", name: "Agendamento", color: "bg-yellow-500" },
-      { id: "pre-op", name: "Pré-Operatório", color: "bg-orange-500" },
-      { id: "realizada", name: "Cirurgia Realizada", color: "bg-green-500" },
-      { id: "pos-op", name: "Pós-Operatório", color: "bg-emerald-500" },
-    ],
-  },
-]
+import Link from "next/link"
 
 // Interface para mensagens
 interface Message {
@@ -72,7 +33,8 @@ interface Message {
 
 export default function FunnelsPage() {
   const { data: session } = useSession()
-  const [selectedFunnel, setSelectedFunnel] = useState<Funnel>(funnels[0])
+  const [funnels, setFunnels] = useState<Funnel[]>([])
+  const [selectedFunnel, setSelectedFunnel] = useState<Funnel | null>(null)
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [viewMode, setViewMode] = useState<'scroll' | 'grid'>('grid')
@@ -218,7 +180,7 @@ export default function FunnelsPage() {
           id: `contact-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           name: contactName,
           phone: phoneNumber,
-          stageId: "novo-contato", // Estágio inicial
+          stageId: selectedFunnel?.stages[0]?.id || "novo-contato", // Estágio inicial
           status: "needs_response",
           lastActivity: formatTimestamp(timestamp),
           unreadCount: 1
@@ -315,7 +277,7 @@ export default function FunnelsPage() {
     
     // Notificar sobre a mudança de estágio
     const contact = contacts.find(c => c.id === contactId);
-    const stage = selectedFunnel.stages.find(s => s.id === newStageId);
+    const stage = selectedFunnel?.stages.find(s => s.id === newStageId);
     
     if (contact && stage) {
       toast({
@@ -325,8 +287,73 @@ export default function FunnelsPage() {
     }
   };
 
+  // Carregar funis do localStorage
+  const loadFunnels = () => {
+    try {
+      const savedFunnels = localStorage.getItem("funnels");
+      
+      if (savedFunnels) {
+        const parsedFunnels = JSON.parse(savedFunnels);
+        setFunnels(parsedFunnels);
+        setSelectedFunnel(parsedFunnels[0]);
+        return;
+      }
+    } catch (error) {
+      console.error("Erro ao carregar funis do localStorage:", error);
+    }
+    
+    // Dados de exemplo caso não haja funis salvos
+    const defaultFunnels: Funnel[] = [
+      {
+        id: "consulta-inicial",
+        name: "Consulta Inicial",
+        stages: [
+          { id: "novo-contato", name: "Novo Contato", color: "bg-blue-500" },
+          { id: "interesse", name: "Demonstrou Interesse", color: "bg-purple-500" },
+          { id: "agendamento", name: "Agendamento", color: "bg-yellow-500" },
+          { id: "confirmacao", name: "Confirmação", color: "bg-green-500" },
+          { id: "concluido", name: "Consulta Realizada", color: "bg-emerald-500" },
+        ],
+      },
+      {
+        id: "procedimento-estetico",
+        name: "Procedimento Estético",
+        stages: [
+          { id: "contato-inicial", name: "Contato Inicial", color: "bg-blue-500" },
+          { id: "avaliacao", name: "Avaliação", color: "bg-indigo-500" },
+          { id: "orcamento", name: "Orçamento", color: "bg-purple-500" },
+          { id: "agendamento", name: "Agendamento", color: "bg-yellow-500" },
+          { id: "realizado", name: "Procedimento Realizado", color: "bg-green-500" },
+        ],
+      },
+      {
+        id: "cirurgia",
+        name: "Cirurgia Plástica",
+        stages: [
+          { id: "contato-inicial", name: "Contato Inicial", color: "bg-blue-500" },
+          { id: "consulta", name: "Consulta", color: "bg-indigo-500" },
+          { id: "exames", name: "Exames", color: "bg-violet-500" },
+          { id: "orcamento", name: "Orçamento", color: "bg-purple-500" },
+          { id: "agendamento", name: "Agendamento", color: "bg-yellow-500" },
+          { id: "pre-op", name: "Pré-Operatório", color: "bg-orange-500" },
+          { id: "realizada", name: "Cirurgia Realizada", color: "bg-green-500" },
+          { id: "pos-op", name: "Pós-Operatório", color: "bg-emerald-500" },
+        ],
+      },
+    ];
+    
+    setFunnels(defaultFunnels);
+    setSelectedFunnel(defaultFunnels[0]);
+    
+    // Salvar os funis padrão no localStorage
+    localStorage.setItem("funnels", JSON.stringify(defaultFunnels));
+  };
+
   // Efeito para inicializar dados
   useEffect(() => {
+    // Carregar funis
+    loadFunnels();
+    
     // Carregar contatos de exemplo inicialmente
     setContacts([
       {
@@ -459,11 +486,20 @@ export default function FunnelsPage() {
         </Alert>
       )}
 
-      <FunnelHeader
-        selectedFunnel={selectedFunnel}
-        funnels={funnels}
-        onFunnelChange={setSelectedFunnel}
-      />
+      <div className="flex justify-between items-center mb-4">
+        <FunnelHeader
+          selectedFunnel={selectedFunnel}
+          funnels={funnels}
+          onFunnelChange={setSelectedFunnel}
+        />
+        
+        <Link href="/funis/gerenciar">
+          <Button variant="outline" size="sm" className="ml-2">
+            <Settings className="h-4 w-4 mr-2" />
+            Gerenciar Funis
+          </Button>
+        </Link>
+      </div>
 
       <KanbanControls
         viewMode={viewMode}
@@ -472,14 +508,16 @@ export default function FunnelsPage() {
         onScrollRight={scrollRight}
       />
 
-      <KanbanBoard
-        funnel={selectedFunnel}
-        contacts={contacts}
-        viewMode={viewMode}
-        onChatOpen={handleOpenChat}
-        kanbanRef={kanbanRef}
-        onContactMove={updateContactStage}
-      />
+      {selectedFunnel && (
+        <KanbanBoard
+          funnel={selectedFunnel}
+          contacts={contacts}
+          viewMode={viewMode}
+          onChatOpen={handleOpenChat}
+          kanbanRef={kanbanRef}
+          onContactMove={updateContactStage}
+        />
+      )}
 
       <InfoMessage />
 
