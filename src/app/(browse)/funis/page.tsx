@@ -183,7 +183,8 @@ export default function FunnelsPage() {
           stageId: selectedFunnel?.stages[0]?.id || "novo-contato", // Estágio inicial
           status: "needs_response",
           lastActivity: formatTimestamp(timestamp),
-          unreadCount: 1
+          unreadCount: 1,
+          value: 0 // Valor inicial zero para novos contatos
         };
         
         updatedContacts.push(newContact);
@@ -287,6 +288,18 @@ export default function FunnelsPage() {
     }
   };
 
+  // Atualizar contato
+  const updateContact = (updatedContact: Contact) => {
+    const updatedContacts = contacts.map(c => {
+      if (c.id === updatedContact.id) {
+        return updatedContact;
+      }
+      return c;
+    });
+    
+    setContacts(updatedContacts);
+  };
+
   // Carregar funis do localStorage
   const loadFunnels = () => {
     try {
@@ -364,7 +377,8 @@ export default function FunnelsPage() {
         stageId: "novo-contato",
         status: "needs_response" as const,
         lastActivity: "Hoje, 10:30",
-        unreadCount: 2
+        unreadCount: 2,
+        value: 1500
       },
       {
         id: "contact2",
@@ -372,7 +386,8 @@ export default function FunnelsPage() {
         phone: "+5511912345678",
         stageId: "interesse",
         status: "in_conversation" as const,
-        lastActivity: "Hoje, 09:15"
+        lastActivity: "Hoje, 09:15",
+        value: 2800
       },
       {
         id: "contact3",
@@ -380,7 +395,8 @@ export default function FunnelsPage() {
         phone: "+5511998765432",
         stageId: "agendamento",
         status: "waiting_client" as const,
-        lastActivity: "Ontem, 18:45"
+        lastActivity: "Ontem, 18:45",
+        value: 3500
       },
       {
         id: "contact4",
@@ -389,7 +405,8 @@ export default function FunnelsPage() {
         stageId: "novo-contato",
         status: "needs_response" as const,
         lastActivity: "Ontem, 15:20",
-        unreadCount: 1
+        unreadCount: 1,
+        value: 1200
       },
       {
         id: "contact5",
@@ -397,7 +414,8 @@ export default function FunnelsPage() {
         phone: "+5511976543210",
         stageId: "agendamento",
         status: "in_conversation" as const,
-        lastActivity: "Ontem, 14:05"
+        lastActivity: "Ontem, 14:05",
+        value: 4200
       },
       {
         id: "contact6",
@@ -406,7 +424,8 @@ export default function FunnelsPage() {
         stageId: "interesse",
         status: "needs_response" as const,
         lastActivity: "Segunda, 16:30",
-        unreadCount: 3
+        unreadCount: 3,
+        value: 2500
       },
       {
         id: "contact7",
@@ -414,7 +433,8 @@ export default function FunnelsPage() {
         phone: "+5511954321098",
         stageId: "confirmacao",
         status: "resolved" as const,
-        lastActivity: "Segunda, 09:10"
+        lastActivity: "Segunda, 09:10",
+        value: 5000
       },
       {
         id: "contact8",
@@ -422,7 +442,8 @@ export default function FunnelsPage() {
         phone: "+5511943210987",
         stageId: "concluido",
         status: "resolved" as const,
-        lastActivity: "Domingo, 18:20"
+        lastActivity: "Domingo, 18:20",
+        value: 6500
       }
     ]);
     
@@ -529,6 +550,7 @@ export default function FunnelsPage() {
           onOpenChange={setIsChatOpen}
           onSendMessage={(message) => sendMessage(selectedContact.phone, message)}
           onUpdateStage={(stageId) => updateContactStage(selectedContact.id, stageId)}
+          onUpdateContact={updateContact}
         />
       )}
     </div>

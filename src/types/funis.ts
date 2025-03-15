@@ -17,6 +17,7 @@ export interface Contact {
   status: ContactStatus
   lastActivity: string
   unreadCount?: number
+  value?: number // Valor do contato em R$
 }
 
 // Interface para um estágio do funil

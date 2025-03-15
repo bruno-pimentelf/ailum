@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -69,6 +70,7 @@ type Contact = {
   lastContactDate?: string
   closingDate?: string
   channel?: string
+  value?: number
 }
 
 type Message = {
@@ -197,11 +199,19 @@ interface ChatDialogProps {
   contact: Contact
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSendMessage?: (message: string) => Promise<boolean>
-  onUpdateStage?: (stageId: string) => void
+  onSendMessage: (message: string) => Promise<boolean>
+  onUpdateStage: (stageId: string) => void
+  onUpdateContact: (updatedContact: Contact) => void
 }
 
-export function ChatDialog({ contact, open, onOpenChange, onSendMessage, onUpdateStage }: ChatDialogProps) {
+export function ChatDialog({ 
+  contact, 
+  open, 
+  onOpenChange, 
+  onSendMessage,
+  onUpdateStage,
+  onUpdateContact
+}: ChatDialogProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [editedContact, setEditedContact] = useState<Contact>({ ...contact })
