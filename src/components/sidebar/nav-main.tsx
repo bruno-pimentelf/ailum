@@ -1,6 +1,7 @@
 "use client"
 
 import { ChevronRight, type LucideIcon } from "lucide-react"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 import {
@@ -77,9 +78,9 @@ export function NavMain({ items }: NavMainProps) {
                               subItem.isActive && "text-blue-600 font-medium border-l-2 border-blue-600 bg-gradient-to-r from-blue-50/80 to-transparent hover:text-blue-600"
                             )}
                           >
-                            <a href={subItem.url}>
+                            <Link href={subItem.url}>
                               <span>{subItem.title}</span>
-                            </a>
+                            </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ))}
@@ -100,10 +101,10 @@ export function NavMain({ items }: NavMainProps) {
                   isActive && "text-blue-600 font-medium border-l-2 border-blue-600 bg-gradient-to-r from-blue-50/80 to-transparent hover:text-blue-600"
                 )}
               >
-                <a href={item.url}>
+                <Link href={item.url}>
                   {Icon && <Icon className={cn("h-4 w-4", isActive && "text-blue-600")} />}
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           )
