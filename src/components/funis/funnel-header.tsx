@@ -33,7 +33,7 @@ export function FunnelHeader({ selectedFunnel, funnels, onFunnelChange }: Funnel
   return (
     <div className="flex items-center justify-between w-full  bg-white dark:bg-gray-800 ">
       <div className="flex items-center gap-2">
-        <h1 className="text-xl font-bold mr-4">Funil:</h1>
+        <h1 className="text-xl font-bold mr-4">Selecione um Funil:</h1>
         <Select
           value={selectedFunnel.id}
           onValueChange={(value) => {
