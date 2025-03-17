@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { AlertCircle, Settings } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import Link from "next/link"
-
+import { Separator } from "@/components/ui/separator"
 // Interface para mensagens
 interface Message {
   key?: {
@@ -515,6 +515,8 @@ export default function FunnelsPage() {
         />
         
       </div>
+
+      <Separator className="my-4"/>
 
       <KanbanControls
         viewMode={viewMode}

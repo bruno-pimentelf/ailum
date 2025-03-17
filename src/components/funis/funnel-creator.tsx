@@ -191,7 +191,6 @@ export function FunnelCreator({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Gerenciar Funis</h2>
         <Dialog open={isOpen} onOpenChange={(open) => {
           setIsOpen(open)
           if (!open) resetForm()

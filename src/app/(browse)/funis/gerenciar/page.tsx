@@ -136,7 +136,7 @@ export default function GerenciarFunisPage() {
         <h1 className="text-3xl font-bold">Gerenciar Funis</h1>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-gray-800">
         <FunnelCreator
           funnels={funnels}
           onFunnelCreate={handleCreateFunnel}

@@ -23,7 +23,7 @@ export function FunnelHeader({ selectedFunnel, funnels, onFunnelChange }: Funnel
 
   if (!mounted || !selectedFunnel) {
     return (
-      <div className="flex items-center justify-between mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div className="flex items-center justify-between mb-4  bg-white dark:bg-gray-800 ">
         <div className="h-10 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
         <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
       </div>
@@ -31,7 +31,7 @@ export function FunnelHeader({ selectedFunnel, funnels, onFunnelChange }: Funnel
   }
 
   return (
-    <div className="flex items-center justify-between w-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+    <div className="flex items-center justify-between w-full  bg-white dark:bg-gray-800 ">
       <div className="flex items-center gap-2">
         <h1 className="text-xl font-bold mr-4">Funil:</h1>
         <Select
