@@ -514,12 +514,6 @@ export default function FunnelsPage() {
           onFunnelChange={setSelectedFunnel}
         />
         
-        <Link href="/funis/gerenciar">
-          <Button variant="outline" size="sm" className="ml-2">
-            <Settings className="h-4 w-4 mr-2" />
-            Gerenciar Funis
-          </Button>
-        </Link>
       </div>
 
       <KanbanControls

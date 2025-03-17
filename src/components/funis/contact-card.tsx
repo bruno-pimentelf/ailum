@@ -2,8 +2,7 @@ import { Clock, MessageSquare, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { ContactStatus, Contact } from "@/types/funis"
-import { Badge } from "@/components/ui/badge"
-
+import Image from "next/image"
 // Função para obter a cor e texto do status
 const getStatusInfo = (status: ContactStatus) => {
   switch (status) {
@@ -73,9 +72,11 @@ export function ContactCard({ contact, onChatOpen, onDragStart, onClick, onMove 
       <CardHeader className="p-2 sm:p-3 pb-0 flex flex-row items-center gap-2">
         <div className="flex h-6 w-6 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
           {contact.avatar ? (
-            <img 
+            <Image   
               src={contact.avatar} 
               alt={contact.name}
+              width={32}
+              height={32}
               className="h-6 w-6 sm:h-8 sm:w-8 rounded-full"
             />
           ) : (
