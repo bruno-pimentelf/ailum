@@ -27,6 +27,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
+  funnels       Funnel[]
+  contacts      Contact[]
 }
 
 model Account {
@@ -62,4 +64,75 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Funnel {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stages      Stage[]
+  contacts    Contact[]
+
+  @@index([userId])
+}
+
+model Stage {
+  id        String    @id @default(cuid())
+  name      String
+  color     String
+  order     Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  funnelId  String
+  funnel    Funnel    @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  contacts  Contact[]
+
+  @@index([funnelId])
+}
+
+model Contact {
+  id              String        @id @default(cuid())
+  name            String
+  phone           String
+  email           String?
+  avatar          String?
+  status          String        // needs_response, in_conversation, waiting_client, resolved
+  lastActivity    DateTime      @default(now())
+  unreadCount     Int           @default(0)
+  addedAt         DateTime      @default(now())
+  serviceInterest String?
+  priority        String?       // low, medium, high
+  estimatedValue  Float?
+  lastContactDate DateTime?
+  closingDate     DateTime?
+  channel         String?
+  value           Float?
+  notes           String?
+  stageId         String
+  stage           Stage         @relation(fields: [stageId], references: [id])
+  funnelId        String
+  funnel          Funnel        @relation(fields: [funnelId], references: [id])
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages        Message[]
+
+  @@index([stageId])
+  @@index([funnelId])
+  @@index([userId])
+}
+
+model Message {
+  id           String   @id @default(cuid())
+  content      String
+  timestamp    DateTime @default(now())
+  isFromContact Boolean
+  isRead       Boolean  @default(false)
+  contactId    String
+  contact      Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([contactId])
 }

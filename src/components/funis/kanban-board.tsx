@@ -1,4 +1,3 @@
-import { useRef } from "react"
 import { Contact, Funnel } from "@/types/funis"
 import { StageColumn } from "./stage-column"
 

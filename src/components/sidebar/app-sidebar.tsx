@@ -8,6 +8,7 @@ import {
   FolderKanban,
   Home,
   MessageSquare,
+  Users,
 } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 
@@ -41,6 +42,11 @@ const navMainItems: NavItem[] = [
     title: "Funis de Vendas",
     url: "/funis",
     icon: FolderKanban,
+  },
+  {
+    title: "Contatos",
+    url: "/contatos",
+    icon: Users,
   },
   {
     title: "Mensagens",

@@ -12,7 +12,6 @@ import { toast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { AlertCircle, Settings } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import Link from "next/link"
 import { Separator } from "@/components/ui/separator"
 // Interface para mensagens
 interface Message {
