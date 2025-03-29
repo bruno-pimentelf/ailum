@@ -40,8 +40,8 @@ export function NavProjects({ projects }: NavProjectsProps) {
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Acesso Rápido</SidebarGroupLabel>
-      <SidebarMenu>
+      <SidebarGroupLabel className="text-center">Acesso Rápido</SidebarGroupLabel>
+      <SidebarMenu className="flex flex-col gap-2">
         {projects.map((project, i) => {
           const Icon = project.icon
           const isActive = project.isActive
@@ -52,18 +52,18 @@ export function NavProjects({ projects }: NavProjectsProps) {
                 asChild
                 tooltip={project.name}
                 className={cn(
-                  "hover:bg-muted/80 hover:text-blue-600 transition-colors duration-200",
-                  isActive && "text-blue-600 font-medium border-l-2 border-blue-600 bg-gradient-to-r from-blue-50/80 to-transparent hover:text-blue-600"
+                  "hover:bg-muted/80 hover:text-blue-600 transition-colors duration-200 flex-col py-2 h-auto",
+                  isActive && "text-blue-600 font-medium border-t-2 border-blue-600 bg-gradient-to-b from-blue-50/80 to-transparent hover:text-blue-600"
                 )}
               >
-                <a href={project.url}>
-                  {Icon && <Icon className={cn("h-4 w-4", isActive && "text-blue-600")} />}
-                  <span>{project.name}</span>
+                <a href={project.url} className="flex flex-col items-center">
+                  {Icon && <Icon className={cn("h-5 w-5 mb-1", isActive && "text-blue-600")} />}
+                  <span className="text-xs">{project.name}</span>
                 </a>
               </SidebarMenuButton>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <SidebarMenuAction showOnHover>
+                  <SidebarMenuAction showOnHover className="top-1 right-1">
                     <MoreHorizontal />
                     <span className="sr-only">Mais</span>
                   </SidebarMenuAction>
@@ -92,9 +92,9 @@ export function NavProjects({ projects }: NavProjectsProps) {
           )
         })}
         <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal className="text-sidebar-foreground/70" />
-            <span>Mais opções</span>
+          <SidebarMenuButton className="text-sidebar-foreground/70 flex-col py-2 h-auto">
+            <MoreHorizontal className="text-sidebar-foreground/70 h-5 w-5 mb-1" />
+            <span className="text-xs">Mais opções</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

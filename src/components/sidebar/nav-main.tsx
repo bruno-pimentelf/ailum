@@ -36,7 +36,7 @@ interface NavMainProps {
 export function NavMain({ items }: NavMainProps) {
   return (
     <SidebarGroup>
-      <SidebarMenu>
+      <SidebarMenu className="flex flex-col gap-2">
         {items.map((item, i) => {
           const Icon = item.icon
           const isActive = item.isActive
@@ -54,14 +54,14 @@ export function NavMain({ items }: NavMainProps) {
                     <SidebarMenuButton
                       tooltip={item.title}
                       className={cn(
-                        "hover:bg-muted/80 hover:text-blue-600 transition-colors duration-200",
-                        isActive && "text-blue-600 font-medium border-l-2 border-blue-600 bg-gradient-to-r from-blue-50/80 to-transparent hover:text-blue-600"
+                        "hover:bg-muted/80 hover:text-blue-600 transition-colors duration-200 flex-col py-2 h-auto",
+                        isActive && "text-blue-600 font-medium border-t-2 border-blue-600 bg-gradient-to-b from-blue-50/80 to-transparent hover:text-blue-600"
                       )}
                     >
-                      {Icon && <Icon className={cn("h-4 w-4", isActive && "text-blue-600")} />}
-                      <span>{item.title}</span>
+                      {Icon && <Icon className={cn("h-5 w-5 mb-1", isActive && "text-blue-600")} />}
+                      <span className="text-xs">{item.title}</span>
                       <ChevronRight className={cn(
-                        "ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90",
+                        "transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 absolute right-2 top-1/2 -translate-y-1/2",
                         isActive && "text-blue-600"
                       )} />
                     </SidebarMenuButton>
@@ -96,13 +96,13 @@ export function NavMain({ items }: NavMainProps) {
                 asChild
                 tooltip={item.title}
                 className={cn(
-                  "hover:bg-muted/80 hover:text-blue-600 transition-colors duration-200",
-                  isActive && "text-blue-600 font-medium border-l-2 border-blue-600 bg-gradient-to-r from-blue-50/80 to-transparent hover:text-blue-600"
+                  "hover:bg-muted/80 hover:text-blue-600 transition-colors duration-200 flex-col py-2 h-auto",
+                  isActive && "text-blue-600 font-medium border-t-2 border-blue-600 bg-gradient-to-b from-blue-50/80 to-transparent hover:text-blue-600"
                 )}
               >
-                <Link href={item.url}>
-                  {Icon && <Icon className={cn("h-4 w-4", isActive && "text-blue-600")} />}
-                  <span>{item.title}</span>
+                <Link href={item.url} className="flex flex-col items-center">
+                  {Icon && <Icon className={cn("h-5 w-5 mb-1", isActive && "text-blue-600")} />}
+                  <span className="text-xs">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

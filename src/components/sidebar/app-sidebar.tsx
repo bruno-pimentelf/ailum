@@ -122,16 +122,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="flex  items-center">
+      <SidebarHeader className="flex justify-center items-center">
         <Image
           src="/assets/images/ailum-logos/logo-horizontal-dark.png"
           alt="Ailum"
-          width={150}
-          height={100}
+          width={100}
+          height={50}
         />
       </SidebarHeader>
-      <Separator className="my-2" />
-      <SidebarContent>
+      <Separator className="my-1" />
+      <SidebarContent className="px-1">
         <NavMain items={navMainWithActive} />
       </SidebarContent>
       <SidebarFooter>
