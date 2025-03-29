@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 export function StatsCards() {
   return (
     <div className="grid gap-4 md:grid-cols-3 mb-6">
-      <Card className="border-none bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm shadow-sm overflow-hidden relative">
+      <Card className="border border-gray-100/60 bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm shadow-sm overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-br from-[rgba(0,180,190,0.08)] via-transparent to-transparent pointer-events-none"></div>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">
@@ -26,7 +26,7 @@ export function StatsCards() {
         </CardContent>
       </Card>
       
-      <Card className="border-none bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm shadow-sm overflow-hidden relative">
+      <Card className="border border-gray-100/60 bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm shadow-sm overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-br from-[rgba(0,180,190,0.08)] via-transparent to-transparent pointer-events-none"></div>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">
@@ -48,7 +48,7 @@ export function StatsCards() {
         </CardContent>
       </Card>
       
-      <Card className="border-none bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm shadow-sm overflow-hidden relative">
+      <Card className="border border-gray-100/60 bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm shadow-sm overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-br from-[rgba(0,180,190,0.08)] via-transparent to-transparent pointer-events-none"></div>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">

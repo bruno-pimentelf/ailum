@@ -4,7 +4,7 @@ import { Brain, ChevronRight, Zap } from "lucide-react"
 
 export function ActiveFunnels() {
   return (
-    <Card className="md:col-span-3 border-none bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm shadow-sm overflow-hidden relative">
+    <Card className="md:col-span-3 border border-gray-100/60 bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm shadow-sm overflow-hidden relative">
       <div className="absolute inset-0 bg-gradient-to-br from-[rgba(0,180,190,0.05)] via-transparent to-transparent pointer-events-none"></div>
       
       <CardHeader className="flex flex-row items-start justify-between">
