@@ -54,15 +54,15 @@ export function NavMain({ items }: NavMainProps) {
                     <SidebarMenuButton
                       tooltip={item.title}
                       className={cn(
-                        "hover:bg-muted/80 hover:text-blue-600 transition-colors duration-200 flex-col py-2 h-auto",
-                        isActive && "text-blue-600 font-medium border-t-2 border-blue-600 bg-gradient-to-b from-blue-50/80 to-transparent hover:text-blue-600"
+                        "hover:bg-muted/80 hover:text-[rgb(0,180,190)] transition-colors duration-200 flex-col py-2 h-auto",
+                        isActive && "text-[rgb(0,180,190)] font-medium border-t-2 border-[rgb(0,180,190)] bg-gradient-to-b from-[rgba(0,180,190,0.1)] to-transparent hover:text-[rgb(0,180,190)]"
                       )}
                     >
-                      {Icon && <Icon className={cn("h-5 w-5 mb-1", isActive && "text-blue-600")} />}
+                      {Icon && <Icon className={cn("h-5 w-5 mb-1", isActive && "text-[rgb(0,180,190)]")} />}
                       <span className="text-xs">{item.title}</span>
                       <ChevronRight className={cn(
                         "transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 absolute right-2 top-1/2 -translate-y-1/2",
-                        isActive && "text-blue-600"
+                        isActive && "text-[rgb(0,180,190)]"
                       )} />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
@@ -73,8 +73,8 @@ export function NavMain({ items }: NavMainProps) {
                           <SidebarMenuSubButton 
                             asChild
                             className={cn(
-                              "hover:bg-muted/80 hover:text-blue-600 transition-colors duration-200",
-                              subItem.isActive && "text-blue-600 font-medium border-l-2 border-blue-600 bg-gradient-to-r from-blue-50/80 to-transparent hover:text-blue-600"
+                              "hover:bg-muted/80 hover:text-[rgb(0,180,190)] transition-colors duration-200",
+                              subItem.isActive && "text-[rgb(0,180,190)] font-medium border-l-2 border-[rgb(0,180,190)] bg-gradient-to-r from-[rgba(0,180,190,0.1)] to-transparent hover:text-[rgb(0,180,190)]"
                             )}
                           >
                             <Link href={subItem.url}>
@@ -96,12 +96,12 @@ export function NavMain({ items }: NavMainProps) {
                 asChild
                 tooltip={item.title}
                 className={cn(
-                  "hover:bg-muted/80 hover:text-blue-600 transition-colors duration-200 flex-col py-2 h-auto",
-                  isActive && "text-blue-600 font-medium border-t-2 border-blue-600 bg-gradient-to-b from-blue-50/80 to-transparent hover:text-blue-600"
+                  "hover:bg-muted/80 hover:text-[rgb(0,180,190)] transition-colors duration-200 flex-col py-2 h-auto",
+                  isActive && "text-[rgb(0,180,190)] font-medium border-t-2 border-[rgb(0,180,190)] bg-gradient-to-b from-[rgba(0,180,190,0.1)] to-transparent hover:text-[rgb(0,180,190)]"
                 )}
               >
                 <Link href={item.url} className="flex flex-col items-center">
-                  {Icon && <Icon className={cn("h-5 w-5 mb-1", isActive && "text-blue-600")} />}
+                  {Icon && <Icon className={cn("h-5 w-5 mb-1", isActive && "text-[rgb(0,180,190)]")} />}
                   <span className="text-xs">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
