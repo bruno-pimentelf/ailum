@@ -8,9 +8,17 @@ interface StageColumnProps {
   onChatOpen: (contact: Contact) => void
   onDragStart?: (e: React.DragEvent, contactId: string) => void
   onContactMove: (contactId: string, newStageId: string) => void
+  viewMode?: 'scroll' | 'grid' | 'column'
 }
 
-export function StageColumn({ stage, contacts, onChatOpen, onDragStart, onContactMove }: StageColumnProps) {
+export function StageColumn({ 
+  stage, 
+  contacts, 
+  onChatOpen, 
+  onDragStart, 
+  onContactMove,
+  viewMode = 'grid'
+}: StageColumnProps) {
   // Calcular o valor total acumulado na coluna
   const totalValue = useMemo(() => {
     return contacts
@@ -30,7 +38,11 @@ export function StageColumn({ stage, contacts, onChatOpen, onDragStart, onContac
           {totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
         </span>
       </div>
-      <div className="flex flex-col gap-2 p-2 sm:gap-3 sm:p-3 bg-muted/20 h-full min-h-[200px] xs:min-h-[250px] sm:min-h-[300px] overflow-y-auto">
+      <div className={`
+        flex flex-col gap-2 p-2 sm:gap-3 sm:p-3 bg-muted/20 
+        ${viewMode === 'column' ? 'max-h-[250px]' : 'h-full min-h-[200px] xs:min-h-[250px] sm:min-h-[300px]'} 
+        overflow-y-auto
+      `}>
         {contacts.map((contact) => (
           <ContactCard 
             key={contact.id}

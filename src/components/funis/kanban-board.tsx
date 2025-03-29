@@ -4,7 +4,7 @@ import { StageColumn } from "./stage-column"
 interface KanbanBoardProps {
   funnel: Funnel
   contacts: Contact[]
-  viewMode: 'scroll' | 'grid'
+  viewMode: 'scroll' | 'grid' | 'column'
   onChatOpen: (contact: Contact) => void
   kanbanRef: React.RefObject<HTMLDivElement>
   onContactMove?: (contactId: string, newStageId: string) => void
@@ -54,7 +54,9 @@ export function KanbanBoard({
       className={`
         ${viewMode === 'scroll' 
           ? 'flex flex-nowrap overflow-x-auto pr-4' 
-          : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
+          : viewMode === 'column'
+            ? 'flex flex-col gap-4 pr-1'
+            : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
         } 
         pb-6 gap-4 md:gap-5 snap-x
       `}
@@ -69,7 +71,9 @@ export function KanbanBoard({
           className={`
             ${viewMode === 'scroll' 
               ? 'flex-shrink-0 flex-grow-0 w-[260px] xs:w-[280px] sm:w-[300px] snap-start' 
-              : 'w-full h-full'
+              : viewMode === 'column'
+                ? 'w-full mb-2'
+                : 'w-full h-full'
             }
           `}
           onDrop={(e) => handleDrop(e, stage.id)}
@@ -81,6 +85,7 @@ export function KanbanBoard({
             onChatOpen={onChatOpen}
             onDragStart={handleDragStart}
             onContactMove={handleContactMove}
+            viewMode={viewMode}
           />
         </div>
       ))}

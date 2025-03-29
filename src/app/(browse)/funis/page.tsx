@@ -36,7 +36,7 @@ export default function FunnelsPage() {
   const [selectedFunnel, setSelectedFunnel] = useState<Funnel | null>(null)
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [viewMode, setViewMode] = useState<'scroll' | 'grid'>('grid')
+  const [viewMode, setViewMode] = useState<'scroll' | 'grid' | 'column'>('grid')
   const kanbanRef = useRef<HTMLDivElement>(null)
   const [contacts, setContacts] = useState<Contact[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -467,7 +467,9 @@ export default function FunnelsPage() {
   // Efeito para ajustar o modo de visualização com base no tamanho da tela
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
+      if (window.innerWidth < 640) {
+        setViewMode('column')
+      } else if (window.innerWidth < 768) {
         setViewMode('scroll')
       } else {
         setViewMode('grid')

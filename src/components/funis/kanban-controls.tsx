@@ -1,9 +1,9 @@
-import { ChevronLeft, ChevronRight, LayoutGrid, List } from "lucide-react"
+import { ChevronLeft, ChevronRight, LayoutGrid, List, AlignJustify } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface KanbanControlsProps {
-  viewMode: 'scroll' | 'grid'
-  onViewModeChange: (mode: 'scroll' | 'grid') => void
+  viewMode: 'scroll' | 'grid' | 'column'
+  onViewModeChange: (mode: 'scroll' | 'grid' | 'column') => void
   onScrollLeft: () => void
   onScrollRight: () => void
 }
@@ -14,24 +14,43 @@ export function KanbanControls({
   onScrollLeft,
   onScrollRight
 }: KanbanControlsProps) {
+  // Função para alternar entre os modos de visualização
+  const toggleViewMode = () => {
+    if (viewMode === 'scroll') {
+      onViewModeChange('grid');
+    } else if (viewMode === 'grid') {
+      onViewModeChange('column');
+    } else {
+      onViewModeChange('scroll');
+    }
+  };
+  
   return (
     <div className="flex items-center justify-between gap-2 mb-2">
-      <div className="hidden md:flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <Button 
           variant="outline" 
           size="sm" 
           className="h-8 text-xs sm:text-sm"
-          onClick={() => onViewModeChange(viewMode === 'scroll' ? 'grid' : 'scroll')}
+          onClick={toggleViewMode}
         >
           {viewMode === 'scroll' ? (
             <>
               <LayoutGrid className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              <span>Visualizar em grade</span>
+              <span className="hidden md:inline">Visualizar em grade</span>
+              <span className="md:hidden">Grade</span>
+            </>
+          ) : viewMode === 'grid' ? (
+            <>
+              <AlignJustify className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden md:inline">Visualizar em coluna</span>
+              <span className="md:hidden">Coluna</span>
             </>
           ) : (
             <>
               <List className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              <span>Visualizar em lista</span>
+              <span className="hidden md:inline">Visualizar em lista</span>
+              <span className="md:hidden">Lista</span>
             </>
           )}
         </Button>
